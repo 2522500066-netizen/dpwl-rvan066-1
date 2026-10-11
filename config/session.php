@@ -4,9 +4,7 @@ class Session
 {
     public function __construct()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        session_start();
     }
 
     public function set_userdata($key, $value)
@@ -19,18 +17,19 @@ class Session
         return $_SESSION[$key] ?? null;
     }
 
-    public function get_userdata($key)
-    {
-        return $_SESSION[$key] ?? null;
-    }
-
     public function unset_userdata($key)
     {
         unset($_SESSION[$key]);
     }
 
-    public function sess_destroy()
+    public function set_flashdata($key, $value = null)
     {
-        session_destroy();
+        if ($value !== null) {
+            $_SESSION['_flash'][$key] = $value;
+        } else {
+            $data = $_SESSION['_flash'][$key] ?? null;
+            unset($_SESSION['_flash'][$key]);
+            return $data;
+        }
     }
 }
