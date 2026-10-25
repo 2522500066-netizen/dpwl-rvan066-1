@@ -12,11 +12,11 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet"
-          href="/dpwl-indra0068/AdminLTE-3.2.0/plugins/fontawesome-free/css/all.min.css">
+          href="/dpwl-rvan066-1/AdminLTE-3.2.0/plugins/fontawesome-free/css/all.min.css">
 
     <!-- AdminLTE CSS -->
     <link rel="stylesheet"
-          href="/dpwl-indra0068/AdminLTE-3.2.0/dist/css/adminlte.min.css">
+          href="/dpwl-rvan066-1/AdminLTE-3.2.0/dist/css/adminlte.min.css">
 </head>
 
 <body class="hold-transition sidebar-mini">

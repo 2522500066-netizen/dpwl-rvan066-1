@@ -3,7 +3,7 @@
     <!-- Logo -->
     <a href="<?= base_url('Admin_C') ?>" class="brand-link">
         <img
-            src="/dpwl-indra0068/AdminLTE-3.2.0/dist/img/AdminLTELogo.png"
+            src="/dpwl-rvan066-1/AdminLTE-3.2.0/dist/img/AdminLTELogo.png"
             alt="AdminLTE Logo"
             class="brand-image img-circle elevation-3"
             style="opacity: .8">
@@ -16,18 +16,16 @@
         <!-- Profil pengguna -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-    <img
-    src="<?= base_url('foto_indra.jpg') ?>"
-    class="img-circle elevation-2"
-    alt="Foto Indra"
-    style="width: 35px; height: 35px; object-fit: cover;">
-
+                <img
+                    src="<?= base_url('foto_indra.jpg') ?>"
+                    class="img-circle elevation-2"
+                    alt="Foto Indra"
+                    style="width: 35px; height: 35px; object-fit: cover;">
             </div>
 
             <div class="info">
                 <a href="#" class="d-block">
-    User: Indra
-</a>
+                    User: Indra
                 </a>
             </div>
         </div>
@@ -58,14 +56,14 @@
                 data-accordion="false">
 
                 <!-- Master Data -->
-<li class="nav-item menu-open">
-    <a href="#" class="nav-link active">
-        <i class="nav-icon fas fa-database"></i>
-        <p>
-            Master Data
-            <i class="right fas fa-angle-left"></i>
-        </p>
-    </a>
+                <li class="nav-item menu-open">
+                    <a href="#" class="nav-link active">
+                        <i class="nav-icon fas fa-database"></i>
+                        <p>
+                            Master Data
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
 
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
@@ -86,14 +84,14 @@
                 </li>
 
                 <!-- Transaksi -->
-<li class="nav-item menu-open">
-    <a href="#" class="nav-link active">
-        <i class="nav-icon fas fa-exchange-alt"></i>
-        <p>
-            Transaksi
-            <i class="right fas fa-angle-left"></i>
-        </p>
-    </a>
+                <li class="nav-item menu-open">
+                    <a href="#" class="nav-link active">
+                        <i class="nav-icon fas fa-exchange-alt"></i>
+                        <p>
+                            Transaksi
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
 
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
@@ -127,14 +125,14 @@
                 </li>
 
                 <!-- Laporan -->
-             <li class="nav-item menu-open">
-             <a href="#" class="nav-link active">
-               <i class="nav-icon fas fa-chart-bar"></i>
-          <p>
-            Laporan
-            <i class="right fas fa-angle-left"></i>
-        </p>
-    </a>
+                <li class="nav-item menu-open">
+                    <a href="#" class="nav-link active">
+                        <i class="nav-icon fas fa-chart-bar"></i>
+                        <p>
+                            Laporan
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
 
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
