@@ -8,28 +8,30 @@ class Controller
             public function view($viewName, $data = [])
             {
                 if (!empty($data)) extract($data);
-                include './view/' . $viewName . '.php';
+                $base = dirname(__DIR__);
+                $file = $base . '/view/' . $viewName . '.php';
+                
+                if (!file_exists($file)) {
+                    die("VIEW GAK KETEMU. Saya cari di: $file <br> Cek apakah file mobilview.php ada di folder view/v_master/");
+                }
+                include $file;
             }
             public function model($modelName)
             {
-                require_once './model/' . $modelName . '.php';
+                $base = dirname(__DIR__);
+                require_once $base . '/model/' . $modelName . '.php';
+                $modelName = basename($modelName);
                 return new $modelName();
             }
-
             public function post($key = null)
             {
-                if ($key === null) {
-                    return $_POST;
-                }
-                return $_POST[$key] ?? null;
+              if ($key === null) return $_POST;
+              return $_POST[$key] ?? null;
             }
-
             public function get($key = null)
             {
-                if ($key === null) {
-                    return $_GET;
-                }
-                return $_GET[$key] ?? null;
+              if ($key === null) return $_GET;
+              return $_GET[$key] ?? null;
             }
         };
     }

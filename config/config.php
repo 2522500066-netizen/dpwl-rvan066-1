@@ -1,2 +1,2 @@
 <?php
-$config['base_url'] = 'http://localhost/dpwl-rvan066-1';
+define('BASE_URL', 'http://localhost/dpwl-rvan066-1/');
