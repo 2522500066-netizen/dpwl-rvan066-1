@@ -1,43 +1,32 @@
 <?php
-
 class Mobil_C extends Controller
 {
-    // Menampilkan data mobil
     public function index()
     {
-        $email = $this->session->userdata('emailuser') ?? 'admin@';
-        $info['nm_user'] = explode('@', $email)[0];
-
         $cekdata = $this->load->model('m_master/Mobil_M');
         $dt['dtmobil'] = $cekdata->datamobil();
-
+        $info['nm_user'] = explode('@', $this->session->userdata('emailuser'))[0];
         $this->load->view('layout/header');
         $this->load->view('layout/sidebar', $info);
         $this->load->view('v_master/mobilview', $dt);
         $this->load->view('layout/footer');
     }
 
-    // Menampilkan form tambah mobil
     public function create_mobil()
     {
-        $email = $this->session->userdata('emailuser') ?? 'admin@';
-        $info['nm_user'] = explode('@', $email)[0];
-
+        $info['nm_user'] = explode('@', $this->session->userdata('emailuser'))[0];
         $this->load->view('layout/header');
         $this->load->view('layout/sidebar', $info);
         $this->load->view('v_master/create_mobilview');
         $this->load->view('layout/footer');
     }
 
-    // Menyimpan data mobil
     public function simpan()
     {
         $mobil = $this->load->model('m_master/Mobil_M');
+        $no_plat = $this->load->post('no_plat');
 
-        $plat = $this->load->post('no_plat');
-
-        // Memeriksa nomor plat
-        if ($mobil->cekplat($plat)) {
+        if ($mobil->cekplat($no_plat)) {
             echo "<script>
                 alert('Nomor plat sudah terdaftar!');
                 window.history.back();
@@ -45,70 +34,81 @@ class Mobil_C extends Controller
             exit;
         }
 
-        // Menentukan folder penyimpanan foto
-        $folder = dirname(__DIR__, 2) . '/img/';
-
-        if (!is_dir($folder)) {
-            mkdir($folder, 0777, true);
+        // 1. Buat folder img jika belum ada
+        $dir_path = dirname(__DIR__, 2) . '/img/';
+        if (!file_exists($dir_path)) {
+            mkdir($dir_path, 0777, true);
         }
 
-        // Upload ketiga foto mobil
-        $namaFiledepan = $this->uploadFoto(
-            'ft_depan',
-            $folder,
-            'Depan_' . $plat
-        );
+        // 2. Bersihkan karakter spasi dari nomor plat untuk penamaan file
+        $clean_plat = str_replace(' ', '_', trim($no_plat));
 
-        $namaFileblkg = $this->uploadFoto(
-            'ft_blkg',
-            $folder,
-            'Belakang_' . $plat
-        );
-
-        $namaFileinterior = $this->uploadFoto(
-            'ft_interior',
-            $folder,
-            'Interior_' . $plat
-        );
-
-        // Jika upload gagal, hentikan proses
-        if (
-            $namaFiledepan === false ||
-            $namaFileblkg === false ||
-            $namaFileinterior === false
-        ) {
-            echo "<script>
-                alert('Upload foto gagal! Gunakan JPG/PNG maksimal 2 MB per foto.');
-                window.history.back();
-            </script>";
-            exit;
+        // ------------------------------------------
+        // FOTO DEPAN
+        // ------------------------------------------
+        $ft_depan = '';
+        if (!empty($_FILES['ft_depan']['name'])) {
+            $ext = strtolower(pathinfo($_FILES['ft_depan']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                $ft_depan = 'Depan_' . $clean_plat . '.' . $ext;
+                move_uploaded_file($_FILES['ft_depan']['tmp_name'], $dir_path . $ft_depan);
+            }
         }
 
-        // Data yang akan disimpan ke database
+        // ------------------------------------------
+        // FOTO BELAKANG
+        // ------------------------------------------
+        $ft_blkg = '';
+        if (!empty($_FILES['ft_blkg']['name'])) {
+            $ext2 = strtolower(pathinfo($_FILES['ft_blkg']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext2, ['jpg', 'jpeg', 'png'])) {
+                $ft_blkg = 'Belakang_' . $clean_plat . '.' . $ext2;
+                move_uploaded_file($_FILES['ft_blkg']['tmp_name'], $dir_path . $ft_blkg);
+            }
+        }
+
+        // ------------------------------------------
+        // FOTO INTERIOR
+        // ------------------------------------------
+        $ft_interior = '';
+        if (!empty($_FILES['ft_interior']['name'])) {
+            $ext3 = strtolower(pathinfo($_FILES['ft_interior']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext3, ['jpg', 'jpeg', 'png'])) {
+                $ft_interior = 'Interior_' . $clean_plat . '.' . $ext3;
+                move_uploaded_file($_FILES['ft_interior']['tmp_name'], $dir_path . $ft_interior);
+            }
+        }
+
+        // ------------------------------------------
+        // SANITASI DATA NUMERIK (Cegah Incorrect Integer Value Error)
+        // ------------------------------------------
+        $nkursi   = $this->load->post('nkursi');
+        $nbagasi  = $this->load->post('nbagasi');
+        $thn_buat = $this->load->post('thn_buat');
+        $hrg_hari = $this->load->post('hrg_hari');
+
         $data = [
-            'no_plat'      => $plat,
-            'nm_mobil'     => $this->load->post('nm_mobil'),
-            'nkursi'       => $this->load->post('nkursi'),
-            'nbagasi'      => $this->load->post('nbagasi'),
-            'jns_mobil'    => $this->load->post('jns_mobil'),
-            'transmisi'    => $this->load->post('transmisi'),
-            'thn_buat'     => $this->load->post('thn_buat'),
-            'ft_depan'     => $namaFiledepan,
-            'ft_blkg'      => $namaFileblkg,
-            'ft_interior'  => $namaFileinterior,
-            'hrg_hari'     => $this->load->post('hrg_hari'),
-            'cttn_unit'    => $this->load->post('cttn_unit'),
-            'status_unit'  => $this->load->post('status_unit')
+            'no_plat'     => $no_plat,
+            'nm_mobil'    => $this->load->post('nm_mobil'),
+            'nkursi'      => ($nkursi !== '' && $nkursi !== null) ? (int)$nkursi : 0,
+            'nbagasi'     => ($nbagasi !== '' && $nbagasi !== null) ? (int)$nbagasi : 0,
+            'jns_mobil'   => $this->load->post('jns_mobil'),
+            'transmisi'   => $this->load->post('transmisi'),
+            'thn_buat'    => ($thn_buat !== '' && $thn_buat !== null) ? (int)$thn_buat : 0,
+            'ft_depan'    => $ft_depan,
+            'ft_blkg'     => $ft_blkg,
+            'ft_interior' => $ft_interior,
+            'hrg_hari'   => ($hrg_hari !== '' && $hrg_hari !== null) ? (float)$hrg_hari : 0,
+            'cttn_unit'   => $this->load->post('cttn_unit'),
+            'status_unit' => $this->load->post('status_unit')
         ];
 
-        // Memanggil model untuk menyimpan data
         $simpan = $mobil->simpan($data);
 
         if ($simpan) {
             echo "<script>
                 alert('Data mobil berhasil disimpan!');
-                window.location.href = '" .
-                base_url('mobil_C/index') . "';
+                window.location.href = '" . base_url('?url=c_master/Mobil_C/index') . "';
             </script>";
         } else {
             echo "<script>
@@ -116,65 +116,5 @@ class Mobil_C extends Controller
                 window.history.back();
             </script>";
         }
-    }
-
-    // Fungsi untuk upload foto mobil
-    private function uploadFoto($field, $folder, $namaDasar)
-    {
-        // Jika foto tidak dipilih, gunakan nama dasar
-        if (
-            !isset($_FILES[$field]) ||
-            $_FILES[$field]['error'] === UPLOAD_ERR_NO_FILE
-        ) {
-            return $namaDasar;
-        }
-
-        $file = $_FILES[$field];
-
-        // Periksa apakah upload berhasil
-        if ($file['error'] !== UPLOAD_ERR_OK) {
-            return false;
-        }
-
-        // Maksimal ukuran foto 2 MB
-        if ($file['size'] > 2 * 1024 * 1024) {
-            return false;
-        }
-
-        // Pastikan file benar-benar berupa gambar
-        $infoGambar = getimagesize($file['tmp_name']);
-
-        if ($infoGambar === false) {
-            return false;
-        }
-
-        // Format gambar yang diperbolehkan
-        $ekstensi = [
-            'image/jpeg' => 'jpg',
-            'image/png'  => 'png'
-        ];
-
-        $mime = $infoGambar['mime'];
-
-        if (!isset($ekstensi[$mime])) {
-            return false;
-        }
-
-        // Amankan nama file
-        $namaAman = preg_replace(
-            '/[^A-Za-z0-9_-]/',
-            '_',
-            $namaDasar
-        );
-
-        $namaFile = $namaAman . '.' . $ekstensi[$mime];
-        $tujuan = $folder . $namaFile;
-
-        // Pindahkan foto ke folder img
-        if (!move_uploaded_file($file['tmp_name'], $tujuan)) {
-            return false;
-        }
-
-        return $namaFile;
     }
 }

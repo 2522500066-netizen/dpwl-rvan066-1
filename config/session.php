@@ -4,7 +4,10 @@ class Session
 {
     public function __construct()
     {
-        session_start();
+        // Cek status session sebelum menjalankan session_start()
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 
     public function set_userdata($key, $value)
@@ -30,6 +33,13 @@ class Session
             $data = $_SESSION['_flash'][$key] ?? null;
             unset($_SESSION['_flash'][$key]);
             return $data;
+        }
+    }
+
+    public function sess_destroy()
+    {
+        if (session_status() !== PHP_SESSION_NONE) {
+            session_destroy();
         }
     }
 }
