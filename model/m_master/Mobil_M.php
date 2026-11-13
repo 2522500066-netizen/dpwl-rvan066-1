@@ -3,11 +3,13 @@
 
 class Mobil_M extends Model
 {
+    // ==========================================
     // MENAMPILKAN DATA MOBIL
+    // ==========================================
     public function datamobil()
     {
         $sql = $this->db->prepare("
-            SELECT 
+            SELECT
                 no_plat,
                 nm_mobil,
                 nkursi,
@@ -22,14 +24,25 @@ class Mobil_M extends Model
                 cttn_unit,
                 status_unit
             FROM mobil
+            ORDER BY no_plat ASC
         ");
+
+        if (!$sql) {
+            die('Query gagal: ' . $this->db->error);
+        }
 
         $sql->execute();
 
-        return $sql->get_result()->fetch_all(MYSQLI_ASSOC);
+        $hasil = $sql->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        $sql->close();
+
+        return $hasil;
     }
 
+    // ==========================================
     // CEK NOMOR PLAT
+    // ==========================================
     public function cekplat($no_plat)
     {
         $sql = $this->db->prepare("
@@ -38,16 +51,63 @@ class Mobil_M extends Model
             WHERE no_plat = ?
         ");
 
+        if (!$sql) {
+            die('Query gagal: ' . $this->db->error);
+        }
+
         $sql->bind_param("s", $no_plat);
         $sql->execute();
 
-        return $sql->get_result()->num_rows > 0;
+        $hasil = $sql->get_result()->num_rows > 0;
+
+        $sql->close();
+
+        return $hasil;
     }
 
+    // ==========================================
+    // MENGAMBIL DATA MOBIL BERDASARKAN PLAT
+    // ==========================================
+    public function get_by_id($no_plat)
+    {
+        $sql = $this->db->prepare("
+            SELECT
+                no_plat,
+                nm_mobil,
+                nkursi,
+                nbagasi,
+                jns_mobil,
+                transmisi,
+                thn_buat,
+                ft_depan,
+                ft_blkg,
+                ft_interior,
+                hrg_hari,
+                cttn_unit,
+                status_unit
+            FROM mobil
+            WHERE no_plat = ?
+        ");
+
+        if (!$sql) {
+            die('Query gagal: ' . $this->db->error);
+        }
+
+        $sql->bind_param("s", $no_plat);
+        $sql->execute();
+
+        $hasil = $sql->get_result()->fetch_assoc();
+
+        $sql->close();
+
+        return $hasil;
+    }
+
+    // ==========================================
     // MENYIMPAN DATA MOBIL
+    // ==========================================
     public function simpan($data)
     {
-        // Menghindari nilai NULL
         foreach ($data as $k => $v) {
             if ($v === null) {
                 $data[$k] = '';
@@ -76,8 +136,12 @@ class Mobil_M extends Model
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
+        if (!$sql) {
+            die('Query gagal: ' . $this->db->error);
+        }
+
         $sql->bind_param(
-            "sssssssssssss",
+            "ssiississsdss",
             $data['no_plat'],
             $data['nm_mobil'],
             $data['nkursi'],
@@ -93,6 +157,83 @@ class Mobil_M extends Model
             $data['status_unit']
         );
 
-        return $sql->execute();
+        $hasil = $sql->execute();
+
+        $sql->close();
+
+        return $hasil;
+    }
+
+    // ==========================================
+    // UPDATE DATA MOBIL
+    // ==========================================
+    public function update($data)
+    {
+        $sql = $this->db->prepare("
+            UPDATE mobil SET
+                nm_mobil = ?,
+                nkursi = ?,
+                nbagasi = ?,
+                jns_mobil = ?,
+                transmisi = ?,
+                thn_buat = ?,
+                ft_depan = ?,
+                ft_blkg = ?,
+                ft_interior = ?,
+                hrg_hari = ?,
+                cttn_unit = ?,
+                status_unit = ?
+            WHERE no_plat = ?
+        ");
+
+        if (!$sql) {
+            die('Query gagal: ' . $this->db->error);
+        }
+
+        $sql->bind_param(
+            "siississsdsss",
+            $data['nm_mobil'],
+            $data['nkursi'],
+            $data['nbagasi'],
+            $data['jns_mobil'],
+            $data['transmisi'],
+            $data['thn_buat'],
+            $data['ft_depan'],
+            $data['ft_blkg'],
+            $data['ft_interior'],
+            $data['hrg_hari'],
+            $data['cttn_unit'],
+            $data['status_unit'],
+            $data['no_plat']
+        );
+
+        $hasil = $sql->execute();
+
+        $sql->close();
+
+        return $hasil;
+    }
+
+    // ==========================================
+    // HAPUS DATA MOBIL
+    // ==========================================
+    public function delete($no_plat)
+    {
+        $sql = $this->db->prepare("
+            DELETE FROM mobil
+            WHERE no_plat = ?
+        ");
+
+        if (!$sql) {
+            die('Query gagal: ' . $this->db->error);
+        }
+
+        $sql->bind_param("s", $no_plat);
+
+        $hasil = $sql->execute();
+
+        $sql->close();
+
+        return $hasil;
     }
 }
