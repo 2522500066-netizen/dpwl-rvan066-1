@@ -1,4 +1,3 @@
-
 <?php
 
 class Mobil_M extends Model
@@ -101,6 +100,15 @@ class Mobil_M extends Model
         $sql->close();
 
         return $hasil;
+    }
+
+    // ==========================================
+    // DETAIL MOBIL BERDASARKAN PLAT (UNTUK SHOP & SEWA)
+    // ==========================================
+    public function detailmobil($no_plat)
+    {
+        $no_plat = rawurldecode((string) $no_plat);
+        return $this->get_by_id($no_plat);
     }
 
     // ==========================================

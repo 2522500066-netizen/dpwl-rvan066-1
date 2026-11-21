@@ -1,4 +1,3 @@
-
 <?php
 
 // ==========================================
@@ -93,6 +92,10 @@ if (
 
     $controllerName = $controller;
 
+    if (strtolower($controllerName) === 'penyewa_c' || strtolower($controllerName) === 'penyewa_c066') {
+        $controllerName = 'Penyewa_C066';
+    }
+
     $controllerFile = $folderPath . '/' . $controllerName . '.php';
 
 }
@@ -123,6 +126,14 @@ else {
 
     }
 
+    // KHUSUS PENYEWA
+
+    if (strtolower($controller) === 'penyewa_c' || strtolower($controller) === 'penyewa_c066') {
+
+        $controllerName = 'Penyewa_C066';
+
+    }
+
 
     // MENCARI FILE CONTROLLER
 
@@ -132,7 +143,11 @@ else {
 
         'controller/c_master/' . $controllerName . '.php',
 
-        'controller/C_master/' . $controllerName . '.php'
+        'controller/C_master/' . $controllerName . '.php',
+
+        'controller/c_shop/' . $controllerName . '.php',
+
+        'controller/C_shop/' . $controllerName . '.php'
 
     ];
 

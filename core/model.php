@@ -5,7 +5,7 @@ class Model
 
     public function __construct()
     {
-        require_once __DIR__ . '/../config/database.php';
+        require __DIR__ . '/../config/database.php';
         $this->db = new mysqli(
             $dbhost,
             $dbuser,
