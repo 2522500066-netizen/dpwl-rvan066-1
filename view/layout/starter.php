@@ -1,4 +1,4 @@
-<!-- Content Wrapper -->
+
 <div class="content-wrapper">
 
     <!-- Content Header -->

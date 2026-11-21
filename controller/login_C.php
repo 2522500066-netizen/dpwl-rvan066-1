@@ -1,115 +1,198 @@
+
 <?php
+
 class Login_C extends Controller
 {
+    // ==========================================
+    // MENAMPILKAN HALAMAN LOGIN ADMIN
+    // ==========================================
     public function index()
     {
-        // Hapus penanda login penyewa jika masuk ke login admin biasa
-        if (method_exists($this->session, 'unset_userdata')) {
-            $this->session->unset_userdata('userplg');
-        }
+        $this->session->unset_userdata('userplg');
 
-        $psn = '';
-        if (method_exists($this->session, 'userdata')) {
-            $psn = $this->session->userdata('pesan');
-            $this->session->unset_userdata('pesan');
-        }
-        $data['psn'] = $psn;
+        $data['psn'] = $this->session->userdata('pesan');
+
+        $this->session->unset_userdata('pesan');
+
         $this->load->view('login', $data);
     }
 
+    // ==========================================
+    // MENAMPILKAN HALAMAN LOGIN PENYEWA
+    // ==========================================
     public function penyewa()
     {
         $this->session->set_userdata('userplg', 'penyewa');
 
-        $psn = '';
-        if (method_exists($this->session, 'userdata')) {
-            $psn = $this->session->userdata('pesan');
-            $this->session->unset_userdata('pesan');
-        }
-        $data['psn'] = $psn;
+        $data['psn'] = $this->session->userdata('pesan');
+
+        $this->session->unset_userdata('pesan');
+
         $this->load->view('login', $data);
     }
 
-    public function CekLogin()
+    // ==========================================
+    // MEMERIKSA PASSWORD
+    // ==========================================
+    private function cekPassword($password, $passwordDB)
     {
-        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-            redirect('Login_C/index');
-            return;
+        if (!is_string($passwordDB) || $passwordDB === '') {
+            return false;
         }
 
-        // Tangkap semua kemungkinan nama input dari form login.php
-        $email = '';
-        if (isset($_POST['email'])) {
-            $email = trim($_POST['email']);
-        } elseif (isset($_POST['username'])) {
-            $email = trim($_POST['username']);
-        } elseif (isset($_POST['user_plg066'])) {
-            $email = trim($_POST['user_plg066']);
+        // Password berbentuk hash
+        if (password_verify($password, $passwordDB)) {
+            return true;
         }
 
-        $password = '';
-        if (isset($_POST['pass'])) {
-            $password = trim($_POST['pass']);
-        } elseif (isset($_POST['password'])) {
-            $password = trim($_POST['password']);
-        } elseif (isset($_POST['sandi066'])) {
-            $password = trim($_POST['sandi066']);
-        }
+        // Password berbentuk teks biasa
+        return hash_equals((string)$passwordDB, (string)$password);
+    }
 
-        // 1. CEK LOGIN KHUSUS PENYEWA (PELANGGAN)
-        if (!empty($this->session->userdata('userplg'))) {
-            if (file_exists(dirname(__DIR__) . '/model/LoginPlg_M.php')) {
-                $cekdata = $this->load->model('LoginPlg_M');
-            } else {
-                $cekdata = $this->load->model('m_master/LoginPlg_M');
-            }
+    // ==========================================
+    // PROSES LOGIN
+    // ==========================================
+    public function Ceklogin()
+    {
+        $email = trim($this->load->post('email'));
+        $password = $this->load->post('password');
 
-            $datauser = $cekdata->DataPlg($email);
+        // ======================================
+        // VALIDASI INPUT
+        // ======================================
+        if ($email === '' || $password === '') {
 
-            if ($datauser && (password_verify($password, $datauser['sandi066']) || $password == $datauser['sandi066'])) {
-                $this->session->set_userdata('EmailPlg', $email);
-                $this->session->set_userdata('NmPlg', $datauser['nm_lngkp066']);
-                $this->session->set_userdata('pesan', 'Login berhasil...');
-                redirect('Shopping/index');
-            } else {
-                $this->session->set_userdata('pesan', 'Gagal: Silahkan cek user, password Anda...');
-                redirect('Login_C/penyewa');
-            }
+            $this->session->set_userdata(
+                'pesan',
+                'Email dan password wajib diisi!'
+            );
+
+            redirect(
+                $this->session->userdata('userplg') == 'penyewa'
+                ? 'Login_C/penyewa'
+                : 'Login_C/index'
+            );
+
             exit();
         }
 
-        // 2. CEK LOGIN ADMIN
-        if ($email == 'revandisastra@gmail.com' && $password == '12345') {
-            $this->session->set_userdata('emailuser', $email);
-            $this->session->set_userdata('nm_user', 'Revan - Aktif');
-            $this->session->set_userdata('status_akun', 'aktif');
-            $this->session->set_userdata('pesan', '');
-            redirect('Admin_C/index');
-            return;
+        // ======================================
+        // LOGIN PENYEWA
+        // ======================================
+        if ($this->session->userdata('userplg') == 'penyewa') {
+
+            $model = $this->load->model('LoginPlg_M');
+
+            $datauser = $model->DataPlg($email);
+
+            if (
+                $datauser &&
+                $this->cekPassword(
+                    $password,
+                    $datauser['sandi066']
+                )
+            ) {
+
+                $this->session->unset_userdata('emailuser');
+
+                $this->session->set_userdata('EmailPlg', $email);
+
+                $this->session->set_userdata(
+                    'NmPlg',
+                    $datauser['nm_lngkp066']
+                );
+
+                $this->session->unset_userdata('userplg');
+
+                $this->session->set_userdata(
+                    'pesan',
+                    'Login penyewa berhasil!'
+                );
+
+                redirect('Shopping/index');
+
+                exit();
+            }
+
+            $this->session->set_userdata(
+                'pesan',
+                'Login penyewa gagal! Periksa email dan password.'
+            );
+
+            redirect('Login_C/penyewa');
+
+            exit();
         }
 
-        require_once dirname(__DIR__) . '/model/Login_M.php';
-        $loginModel = new Login_M();
-        $datauser = $loginModel->ambildata($email);
+        // ======================================
+        // LOGIN ADMIN
+        // ======================================
+        $model = $this->load->model('Login_M');
 
-        if ($datauser && $password == $datauser['password'] && $datauser['status'] == 'aktif') {
-            $this->session->set_userdata('emailuser', $email);
-            $this->session->set_userdata('nm_user', 'Revan - Aktif');
-            $this->session->set_userdata('status_akun', 'aktif');
-            redirect('Admin_C/index');
-        } else {
-            $this->session->set_userdata('pesan', 'Gagal: Silahkan cek email, password, atau status akun Anda...');
-            redirect('Login_C/index');
+        $dataadmin = $model->ambildata($email);
+
+        if ($dataadmin) {
+
+            $passwordDB = $dataadmin['password'];
+
+            $status = strtolower(
+                trim($dataadmin['status_akun'])
+            );
+
+            $cocok = $this->cekPassword(
+                $password,
+                $passwordDB
+            );
+
+            if ($cocok && $status === 'aktif') {
+
+                // Hapus session penyewa
+                $this->session->unset_userdata('EmailPlg');
+                $this->session->unset_userdata('NmPlg');
+                $this->session->unset_userdata('userplg');
+
+                // Simpan session admin
+                $this->session->set_userdata(
+                    'emailuser',
+                    $dataadmin['username']
+                );
+
+                redirect('Admin_C/index');
+
+                exit();
+            }
         }
+
+        // ======================================
+        // LOGIN ADMIN GAGAL
+        // ======================================
+        $this->session->set_userdata(
+            'pesan',
+            'Gagal login! Periksa email, password, dan status akun.'
+        );
+
+        redirect('Login_C/index');
+
+        exit();
     }
 
+    // ==========================================
+    // LOGOUT
+    // ==========================================
     public function keluar()
     {
         $this->session->unset_userdata('userplg');
         $this->session->unset_userdata('EmailPlg');
         $this->session->unset_userdata('NmPlg');
-        $this->session->set_userdata('pesan', 'Berhasil Logout');
-        redirect('Shopping/index');
+        $this->session->unset_userdata('emailuser');
+
+        $this->session->set_userdata(
+            'pesan',
+            'Berhasil Logout!'
+        );
+
+        redirect('Login_C/index');
+
         exit();
     }
 }

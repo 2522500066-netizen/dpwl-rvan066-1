@@ -12,26 +12,34 @@ class Controller
                 $file = $base . '/view/' . $viewName . '.php';
                 
                 if (!file_exists($file)) {
-                    die("VIEW GAK KETEMU. Saya cari di: $file <br> Cek apakah file mobilview.php ada di folder view/v_master/");
+                    die("VIEW GAK KETEMU. Saya cari di: $file");
                 }
                 include $file;
             }
+
             public function model($modelName)
             {
                 $base = dirname(__DIR__);
-                require_once $base . '/model/' . $modelName . '.php';
+                $file = $base . '/model/' . $modelName . '.php';
+                
+                if (!file_exists($file)) {
+                    die("MODEL GAK KETEMU. Saya cari di: $file");
+                }
+                require_once $file;
                 $modelName = basename($modelName);
                 return new $modelName();
             }
+
             public function post($key = null)
             {
-              if ($key === null) return $_POST;
-              return $_POST[$key] ?? null;
+                if ($key === null) return $_POST;
+                return $_POST[$key] ?? null;
             }
+
             public function get($key = null)
             {
-              if ($key === null) return $_GET;
-              return $_GET[$key] ?? null;
+                if ($key === null) return $_GET;
+                return $_GET[$key] ?? null;
             }
         };
     }
