@@ -110,4 +110,88 @@ class Sewa_M extends Model
 
         return $data ? $data['jumlah'] : 0;
     }
+
+    // Menampilkan detail mobil di keranjang
+    public function DtKeranjang($email)
+    {
+        $sql = $this->db->prepare(
+            "SELECT sewa.kode_sewa, sewa.tgl_mulai, sewa.tgl_selesai, sewa.wkt_ambil, sewa.status_sewa,
+                    pilih.no_plat, pilih.n_hari, mobil.nm_mobil, mobil.hrg_hari, mobil.ft_depan
+             FROM sewa
+             INNER JOIN pilih ON sewa.kode_sewa = pilih.kode_sewa
+             INNER JOIN mobil ON pilih.no_plat = mobil.no_plat
+             WHERE sewa.user_plg = ? AND sewa.status_sewa = 'Keranjang'"
+        );
+        $sql->bind_param("s", $email);
+        $sql->execute();
+        $hasil = $sql->get_result();
+        return $hasil->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Hapus detail mobil di keranjang
+    public function HapusDtKeranjang($no_plat, $kode_sewa)
+    {
+        $dtmobil = $this->db->prepare("DELETE FROM pilih WHERE no_plat = ? and kode_sewa=?");
+        $dtmobil->bind_param("ss", $no_plat, $kode_sewa);
+        $hasil = $dtmobil->execute();
+        $dtmobil->close();
+        return $hasil;
+    }
+
+    // Update detail keranjang
+    public function updatekeranjang($data)
+    {
+        // Update tabel sewa
+        $stmt1 = $this->db->prepare("UPDATE sewa SET tgl_mulai = ?, tgl_selesai = ?, wkt_ambil = ? WHERE kode_sewa = ?");
+        $stmt1->bind_param(
+            "ssss",
+            $data['tgl_mulai'],
+            $data['tgl_selesai'],
+            $data['wkt_ambil'],
+            $data['kode_sewa']
+        );
+        $stmt1->execute();
+        $stmt1->close();
+
+        // Update tabel pilih
+        $stmt2 = $this->db->prepare("UPDATE pilih SET n_hari = ? WHERE kode_sewa = ?");
+        $stmt2->bind_param(
+            "is",
+            $data['n_hari'],
+            $data['kode_sewa']
+        );
+        $stmt2->execute();
+        $stmt2->close();
+        $this->db->commit();
+        return true;
+    }
+
+    // Menampilkan detail data checkout
+    public function datacheckout($kode_sewa)
+    {
+        $sql = $this->db->prepare(
+            "SELECT sewa.kode_sewa, sewa.tgl_mulai, sewa.tgl_selesai, sewa.wkt_ambil, sewa.status_sewa,
+                    pilih.no_plat, pilih.hrg_sewa, pilih.n_hari,
+                    mobil.nm_mobil, mobil.ft_depan
+             FROM sewa
+             INNER JOIN pilih ON sewa.kode_sewa = pilih.kode_sewa
+             INNER JOIN mobil ON pilih.no_plat = mobil.no_plat
+             WHERE sewa.kode_sewa = ?"
+        );
+        $sql->bind_param("s", $kode_sewa);
+        $sql->execute();
+        $hasil = $sql->get_result();
+        return $hasil->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // Mengajukan transaksi (ubah status menjadi Diajukan)
+    public function ajukantransaksi($kode_sewa)
+    {
+        $sql = "UPDATE sewa SET status_sewa = 'Diajukan' WHERE kode_sewa = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("s", $kode_sewa);
+        $hasil = $stmt->execute();
+        $stmt->close();
+        return $hasil;
+    }
 }

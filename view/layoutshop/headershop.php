@@ -86,7 +86,7 @@
                     <i class="fas fa-heart text-danger"></i>
                     <span class="badge">0</span>
                 </a>
-                <a href="" class="btn border">
+                <a href="<?= base_url('Sewa_C/keranjang') ?>" class="btn border">
                     <i class="fas fa-shopping-cart text-info"></i>
                     <span class="badge"><?= $dtkeranjang ?></span>
                 </a>
